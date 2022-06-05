@@ -1,15 +1,16 @@
 pipeline {
-  agent any
-  stages {
-    stage('First stage'){
-      steps {
-        echo "I'm runing"  
-      }
+    agent {
+        label "ansible_docker"
     }
-    stage('Second stage'){
-      steps {
-        echo "And I'm too"
-      }
+
+    stages {
+        stage('prepare_node') {
+            steps {
+                git 'https://github.com/Exraydi/jenkins.git'
+                sh 'ansible-vault decrypt secret --vault-password-file vault_pass'
+                sh 'ansible-galaxy install -r requirements.yml -p roles'
+                sh 'ansible-playbook site.yml -i inventory/prod.yml'
+            }
+        }
     }
-  }
 }
